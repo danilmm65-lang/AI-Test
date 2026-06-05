@@ -33,14 +33,14 @@
 </div>
 
 <script type="module">
-    import * as webllm from "https://cdn.jsdelivr.net/npm/@webllm/browser-wgpu@0.2.4/dist/index.js";
+    import * as webllm from "https://cdn.jsdelivr.net/npm/@webllm/browser-wgpu@0.2.3/+esm";
 
     const statusElement = document.getElementById("status");
     const btn = document.getElementById("check-btn");
     const textarea = document.getElementById("user-answer");
     const resultDiv = document.getElementById("result");
 
-    // Модель объявляется строго ОДИН раз
+    // Используем проверенную легкую модель
     const modelId = "Gemma-2b-it-q4f16_1-MLC"; 
 
     const initProgressCallback = (report) => {
@@ -49,10 +49,10 @@
 
     async function initAI() {
         try {
-            // Создаем движок
-            const engine = new webllm.CreateGenericEngine();
+            // Создаем движок из импортированного модуля
+            const engine = await webllm.CreateGenericEngine();
             
-            // Начинаем загрузку файлов модели в кэш
+            // Загружаем модель и передаем колбэк для прогресс-бара
             await engine.reload(modelId, {}, initProgressCallback);
             
             statusElement.style.borderLeftColor = "#00ff00";
@@ -79,12 +79,12 @@
 
         } catch (error) {
             statusElement.style.borderLeftColor = "#ff0000";
-            statusElement.innerText = "Ошибка инициализации WebGPU: " + error.message + ". Проверьте, включено ли аппаратное ускорение в браузере.";
+            statusElement.innerText = "Ошибка инициализации: " + error.message;
             console.error(error);
         }
     }
 
-    // Запускаем инициализацию
+    // Запуск процесса
     initAI();
 </script>
 
