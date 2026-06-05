@@ -14,7 +14,7 @@
         #result { margin-top: 25px; padding: 15px; background: #111; border-radius: 4px; min-height: 40px; word-wrap: break-word; color: #00ffcc; font-family: monospace; }
     </style>
     
-    <script src="https://npm.yandex-team.ru/@webllm/browser-wgpu/dist/index.js"></script>
+    <script type="module" src="webllm.js"></script>
 </head>
 <body>
 
@@ -35,12 +35,15 @@
 </div>
 
 <script>
-    // Ждем, пока страница и библиотека полностью загрузятся
-    window.addEventListener("load", async () => {
+    // Ждем полной загрузки нашего локального модуля движка
+    window.addEventListener("webllm-loaded", async () => {
         const statusElement = document.getElementById("status");
         const btn = document.getElementById("check-btn");
         const textarea = document.getElementById("user-answer");
         const resultDiv = document.getElementById("result");
+
+        // Выбираем модель
+        const modelId = "Gemma-2b-it-q4f16_1-MLC";
 
         // Проверяем, загрузилась ли библиотека глобально в браузер
         if (typeof webllm === "undefined") {
