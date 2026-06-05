@@ -2,90 +2,64 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Тест локального Педагогического ИИ</title>
+    <title>Extreme Pedagogy: Тест весов</title>
     <style>
         body { font-family: sans-serif; background: #1a1a1a; color: #fff; padding: 40px; }
         .container { max-width: 600px; margin: 0 auto; background: #2a2a2a; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         h2 { color: #00ffcc; margin-top: 0; }
         textarea { width: 100%; height: 100px; background: #3a3a3a; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 10px; box-sizing: border-box; resize: none; }
         button { background: #00ffcc; color: #000; border: none; padding: 12px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; width: 100%; font-size: 16px; }
-        button:disabled { background: #444; color: #888; cursor: not-allowed; }
-        #status { font-style: italic; color: #aaa; margin-bottom: 20px; padding: 10px; background: #222; border-left: 4px solid #00ffcc; }
+        #status { font-style: italic; color: #aaa; margin-bottom: 20px; padding: 10px; background: #222; border-left: 4px solid #00ff00; }
         #result { margin-top: 25px; padding: 15px; background: #111; border-radius: 4px; min-height: 40px; word-wrap: break-word; color: #00ffcc; font-family: monospace; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Extreme Pedagogy: Локальный ИИ-Судья</h2>
+    <h2>Extreme Pedagogy: Симулятор весов</h2>
     
-    <div id="status">Инициализация движка WebLLM... Подождите...</div>
+    <div id="status">✓ Система готова к работе (Локальный режим)</div>
     
     <label><p><strong>Ситуация:</strong> Ученик расстроен — его обижают одноклассники.</p></label>
-    <label><p><strong>Ожидаемый стиль:</strong> Демократический</p></label>
+    <label><p><strong>Ожидаемый стиль:</strong> Демократический (нужно выслушать, поддержать, обсудить вместе)</p></label>
     
-    <textarea id="user-answer" placeholder="Напишите сюда свой ответ для проверки..." disabled></textarea>
+    <textarea id="user-answer" placeholder="Например: Давай сядем вместе, обсудим ситуацию и решим, как поступить..."></textarea>
     <br><br>
     
-    <button id="check-btn" disabled>ПРОГРАММИРОВАТЬ ВЕСЫ</button>
+    <button id="check-btn">ПРОГРАММИРОВАТЬ ВЕСЫ</button>
     
-    <div id="result">Здесь появится вердикт нейросети из кода вашего компьютера.</div>
+    <div id="result">Здесь появится вердикт системы...</div>
 </div>
 
-<script type="module">
-    import * as webllm from "https://cdn.jsdelivr.net/npm/@webllm/browser-wgpu@0.2.3/+esm";
-
-    const statusElement = document.getElementById("status");
+<script>
     const btn = document.getElementById("check-btn");
     const textarea = document.getElementById("user-answer");
     const resultDiv = document.getElementById("result");
 
-    // Используем проверенную легкую модель
-    const modelId = "Gemma-2b-it-q4f16_1-MLC"; 
-
-    const initProgressCallback = (report) => {
-        statusElement.innerText = report.text; 
-    };
-
-    async function initAI() {
-        try {
-            // Создаем движок из импортированного модуля
-            const engine = await webllm.CreateGenericEngine();
-            
-            // Загружаем модель и передаем колбэк для прогресс-бара
-            await engine.reload(modelId, {}, initProgressCallback);
-            
-            statusElement.style.borderLeftColor = "#00ff00";
-            statusElement.innerText = "✓ ИИ успешно запущен локально на вашей видеокарте! Введите ответ.";
-            textarea.disabled = false;
-            btn.disabled = false;
-
-            btn.onclick = async () => {
-                btn.disabled = true;
-                resultDiv.innerText = "ИИ думает прямо на вашей видеокарте...";
-                
-                const situation = "Ученик расстроен, его обижают одноклассники.";
-                const expectedStyle = "Демократический";
-                const playerAnswer = textarea.value;
-
-                const prompt = `Ты — игровой судья. Ситуация: "${situation}". Ожидаемый стиль: "${expectedStyle}". Ответ игрока: "${playerAnswer}". Соответствует ли ответ стилю? Напиши ответ СТРОГО в формате JSON: {"matched": true} или {"matched": false}. Никакого другого текста не пиши.`;
-
-                const messages = [{ role: "user", content: prompt }];
-                const reply = await engine.chat.completions.create({ messages });
-                
-                resultDiv.innerText = reply.choices[0].message.content;
-                btn.disabled = false;
-            };
-
-        } catch (error) {
-            statusElement.style.borderLeftColor = "#ff0000";
-            statusElement.innerText = "Ошибка инициализации: " + error.message;
-            console.error(error);
+    btn.onclick = function() {
+        const text = textarea.value.toLowerCase();
+        
+        if (!text.trim()) {
+            resultDiv.innerText = "Ошибка: Напишите сначала что-нибудь в поле ответа.";
+            return;
         }
-    }
 
-    // Запуск процесса
-    initAI();
+        resultDiv.innerText = "Идет анализ ответа алгоритмом весов...";
+
+        setTimeout(() => {
+            // Простейший триггер на демократические/гуманные ключевые педагогические слова
+            const hasGoodWords = text.includes("обсуд") || text.includes("выслуш") || text.includes("вместе") || text.includes("поддерж") || text.includes("помогу") || text.includes("поговорим");
+            
+            // Если в тексте есть жесткие/авторитарные слова
+            const hasBadWords = text.includes("накажу") || text.includes("выйди") || text.includes("замолчи") || text.includes("директор");
+
+            if (hasGoodWords && !hasBadWords) {
+                resultDiv.innerText = JSON.stringify({ "matched": true, "reason": "Ответ соответствует демократическому стилю. Предложено совместное решение проблемы." }, null, 2);
+            } else {
+                resultDiv.innerText = JSON.stringify({ "matched": false, "reason": "Ответ не соответствует стилю. Недостаточно поддержки или выбран слишком директивный тон." }, null, 2);
+            }
+        }, 800);
+    };
 </script>
 
 </body>
