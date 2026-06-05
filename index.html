@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Тест локального Педагогического ИИ</title>
+    <style>
+        body { font-family: sans-serif; background: #1a1a1a; color: #fff; padding: 40px; }
+        .container { max-width: 600px; margin: 0 auto; background: #2a2a2a; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        h2 { color: #00ffcc; margin-top: 0; }
+        textarea { width: 100%; height: 100px; background: #3a3a3a; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 10px; box-sizing: border-box; resize: none; }
+        button { background: #00ffcc; color: #000; border: none; padding: 12px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; width: 100%; font-size: 16px; }
+        button:disabled { background: #444; color: #888; cursor: not-allowed; }
+        #status { font-style: italic; color: #aaa; margin-bottom: 20px; padding: 10px; background: #222; border-left: 4px solid #00ffcc; }
+        #result { margin-top: 25px; padding: 15px; background: #111; border-radius: 4px; min-height: 40px; word-wrap: break-word; color: #00ffcc; font-family: monospace; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Extreme Pedagogy: Локальный ИИ-Судья</h2>
+    
+    <div id="status">Инициализация движка WebLLM... Подождите, это займет немного времени...</div>
+    
+    <label><p><strong>Ситуация:</strong> Ученик расстроен — его обижают одноклассники.</p></label>
+    <label><p><strong>Ожидаемый стиль:</strong> Демократический</p></label>
+    
+    <textarea id="user-answer" placeholder="Напишите сюда свой коварный или обычный ответ для проверки..." disabled></textarea>
+    <br><br>
+    
+    <button id="check-btn" disabled>ПРОГРАММИРОВАТЬ ВЕСЫ</button>
+    
+    <div id="result">Здесь появится вердикт нейросети из кода вашего компьютера.</div>
+</div>
+
+<script type="module">
+    import * as webllm from "https://esm.run/@webllm/browser-wgpu";
+
+    // Используем ультра-компактную модель Gemma-2B от Google, пересобранную для работы прямо в браузере
+    const modelId = "Gemma-2b-it-q4f16_1-MLC"; 
+    
+    const statusElement = document.getElementById("status");
+    const btn = document.getElementById("check-btn");
+    const textarea = document.getElementById("user-answer");
+    const resultDiv = document.getElementById("result");
+
+    // Эта функция автоматически ловит процент загрузки файлов нейросети
+    const initProgressCallback = (report) => {
+        statusElement.innerText = report.text; 
+    };
+
+    try {
+        // Создаем ИИ-контекст в браузере
+        const engine = new webllm.CreateGenericEngine();
+        
+        // Запускаем скачивание/чтение модели из кэша
+        await engine.reload(modelId, {}, initProgressCallback);
+        
+        statusElement.style.borderLeftColor = "#00ff00";
+        statusElement.innerText = "✓ ИИ-модуль успешно загружен в память браузера! Сервер больше не нужен. Вводите текст.";
+        textarea.disabled = false;
+        btn.disabled = false;
+
+        // Логика нажатия кнопки
+        btn.onclick = async () => {
+            btn.disabled = true;
+            resultDiv.innerText = "ИИ думает прямо на вашей видеокарте... Подождите секунду...";
+            
+            const situation = "Ученик расстроен, его обижают одноклассники.";
+            const expectedStyle = "Демократический";
+            const playerAnswer = textarea.value;
+
+            // Строгий промпт, чтобы модель вела себя как судья
+            const prompt = `Ты — беспристрастный игровой судья в педагогической игре. 
+Ситуация: "${situation}". 
+Ожидаемый стиль педагога: "${expectedStyle}". 
+Ответ игрока: "${playerAnswer}". 
+
+Задание: Соответствует ли ответ игрока заявленному стилю воспитания? 
+Ответь СТРОГО в формате JSON: {"matched": true} или {"matched": false}. Никакого другого текста, вступлений или объяснений не пиши.`;
+
+            const messages = [{ role: "user", content: prompt }];
+            
+            // Заставляем нейросеть вычислить ответ в ОЗУ твоего ПК
+            const reply = await engine.chat.completions.create({ messages });
+            
+            const aiText = reply.choices[0].message.content;
+            resultDiv.innerText = aiText;
+            btn.disabled = false;
+        };
+
+    } catch (error) {
+        statusElement.style.borderLeftColor = "#ff0000";
+        statusElement.innerText = "Ошибка запуска WebGPU. Убедитесь, что ваш браузер обновлен и компьютер поддерживает аппаратное ускорение. Текст ошибки: " + error.message;
+        console.error(error);
+    }
+</script>
+
+</body>
+</html>
