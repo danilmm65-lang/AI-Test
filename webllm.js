@@ -1,1 +1,3 @@
-import("https://cdn.jsdelivr.net/npm/@webllm/browser-wgpu@0.2.4/lib/index.js").then(m=>{window.webllm=m;window.dispatchEvent(new Event("webllm-loaded"))}).catch(e=>console.error("Local load fallback error:",e));
+import * as webllmModule from "https://cdn.jsdelivr.net/npm/@webllm/browser-wgpu@0.2.4/lib/index.js";
+window.webllm = webllmModule;
+window.dispatchEvent(new Event("webllm-loaded"));
