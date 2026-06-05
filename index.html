@@ -33,7 +33,7 @@
 </div>
 
 <script type="module">
-    import * as webllm from "https://unpkg.com/@webllm/browser-wgpu@0.2.4/lib/index.js";
+    import { CreateGenericEngine } from "https://cdn.jsdelivr.net/npm/@webllm/browser-wgpu@0.2.4/+esm";
 
     // Используем ультра-компактную модель Gemma-2B от Google, пересобранную для работы прямо в браузере
     const modelId = "Gemma-2b-it-q4f16_1-MLC"; 
@@ -50,7 +50,7 @@
 
     try {
         // Создаем ИИ-контекст в браузере
-        const engine = new webllm.CreateGenericEngine();
+        const engine = await CreateGenericEngine();
         
         // Запускаем скачивание/чтение модели из кэша
         await engine.reload(modelId, {}, initProgressCallback);
