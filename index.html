@@ -13,8 +13,6 @@
         #status { font-style: italic; color: #aaa; margin-bottom: 20px; padding: 10px; background: #222; border-left: 4px solid #00ffcc; }
         #result { margin-top: 25px; padding: 15px; background: #111; border-radius: 4px; min-height: 40px; word-wrap: break-word; color: #00ffcc; font-family: monospace; }
     </style>
-    
-    <script type="module" src="webllm.js"></script>
 </head>
 <body>
 
@@ -34,37 +32,27 @@
     <div id="result">Здесь появится вердикт нейросети из кода вашего компьютера.</div>
 </div>
 
-<script>
-    // Ждем полной загрузки нашего локального модуля движка
-    window.addEventListener("webllm-loaded", async () => {
-        const statusElement = document.getElementById("status");
-        const btn = document.getElementById("check-btn");
-        const textarea = document.getElementById("user-answer");
-        const resultDiv = document.getElementById("result");
+<script type="module">
+    import * as webllm from "https://cdn.jsdelivr.net/npm/@webllm/browser-wgpu@0.2.4/dist/index.js";
 
-        // Выбираем модель
-        const modelId = "Gemma-2b-it-q4f16_1-MLC";
+    const statusElement = document.getElementById("status");
+    const btn = document.getElementById("check-btn");
+    const textarea = document.getElementById("user-answer");
+    const resultDiv = document.getElementById("result");
 
-        // Проверяем, загрузилась ли библиотека глобально в браузер
-        if (typeof webllm === "undefined") {
-            statusElement.style.borderLeftColor = "#ff0000";
-            statusElement.innerText = "Ошибка: Не удалось загрузить файлы скрипта ИИ с сервера библиотеки.";
-            return;
-        }
+    // Модель объявляется строго ОДИН раз
+    const modelId = "Gemma-2b-it-q4f16_1-MLC"; 
 
-        // Выбираем ультра-компактную модель Gemma-2B от Google
-        const modelId = "Gemma-2b-it-q4f16_1-MLC"; 
+    const initProgressCallback = (report) => {
+        statusElement.innerText = report.text; 
+    };
 
-        // Функция отслеживания прогресса загрузки
-        const initProgressCallback = (report) => {
-            statusElement.innerText = report.text; 
-        };
-
+    async function initAI() {
         try {
-            // Создаем движок через глобальный объект библиотеки
+            // Создаем движок
             const engine = new webllm.CreateGenericEngine();
             
-            // Загружаем саму модель
+            // Начинаем загрузку файлов модели в кэш
             await engine.reload(modelId, {}, initProgressCallback);
             
             statusElement.style.borderLeftColor = "#00ff00";
@@ -91,10 +79,13 @@
 
         } catch (error) {
             statusElement.style.borderLeftColor = "#ff0000";
-            statusElement.innerText = "Ошибка инициализации WebGPU: " + error.message;
+            statusElement.innerText = "Ошибка инициализации WebGPU: " + error.message + ". Проверьте, включено ли аппаратное ускорение в браузере.";
             console.error(error);
         }
-    });
+    }
+
+    // Запускаем инициализацию
+    initAI();
 </script>
 
 </body>
